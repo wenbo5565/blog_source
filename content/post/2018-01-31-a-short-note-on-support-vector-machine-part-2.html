@@ -1,0 +1,76 @@
+---
+title: A Short Note on Support Vector Machine (Part 2)
+author: Wenbo
+date: '2018-01-31'
+slug: a-short-note-on-support-vector-machine-part-2
+categories:
+  - ML Notes
+tags: []
+---
+
+
+
+<ol style="list-style-type: decimal">
+<li><strong>Introduction</strong></li>
+</ol>
+<p>In <a href="https://wenbo5565.github.io/post/a-short-note-on-support-vector-machine/">A short note on support vector machine (part 1)</a>, we started from the motivation for SVM, formulated it as an optimization problem and ended by a QP solution of the optimizaiton problem. Taking from there, we will discuss the dual version of SVM. This post aims to answer the following question.</p>
+<ul>
+<li>What is the dual problem of the original SVM problem and why we care it.</li>
+<li>How do we derive the dual problem from the original one.</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Motivation</strong></li>
+</ol>
+<p>Usually the first question I asked myself before studying any new knowledge is that why do I need to learn this? (even why does this staff exisit?). Back to the SVM, we have already had a solution, why do we further bother ourselves?</p>
+<p>The answer is as follows: in the original SVM, we have number of variables <span class="math inline">\(d\)</span> (or called features under machine learning settings) and number of observations <span class="math inline">\(N\)</span>. If d becomes very large (such as features transformations), the original SVM turns to be hard to solve. Therefore, we have to reformulate the original one into a new one with N variables and (N+1) constraints.</p>
+<p>Another reason is the dual probelm is an unconstrained optimizatio problem with repsect to <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span> from which we can obtain some interesting property to get the optimal solution more easily.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Lagrange Function - From Constrained Problem to Unconstrained Probelm</strong></li>
+</ol>
+<p>In most optimization problem, we always want to reformulate the problem into an easier and equivalent one. Up to now, the orginal problem is in the following format</p>
+<center>
+min <span class="math inline">\(\frac{1}{2}{w^{T}w}\)</span><br />
+s.t. <span class="math inline">\(y_{i}(w^{T}x_{i}+b)&gt;=1\)</span>
+</center>
+<p>By using Lagrange multiplier, we can reformulate it into an unconstrained version as</p>
+<center>
+<span class="math inline">\(\underset{w,b}{\text{min}}\Big( \underset{\alpha_{i}\geq0}{\text{max}} \ \frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}(1-y_{i}(w^{T}x_{i}+b))\Big)\)</span>
+</center>
+<p><strong>What we did ?</strong></p>
+<p>This is fairly straightforward, we simply</p>
+<ul>
+<li>move everything in the inequality into right hand side</li>
+<li>add <span class="math inline">\(\alpha_{i}\)</span> to each inequality. (restrict <span class="math inline">\(\alpha_{i}\)</span> to be non-negative)</li>
+<li>add a inner maxmimzation operation before the original minmization problem</li>
+</ul>
+<p><strong>Why they are equivalent problem ?</strong></p>
+<p>To answer this question, we need to take a look at the original problem to see what it needs. Then if we can reason tha thet reformulated problem provides the same, then they are equivalent.</p>
+<ul>
+<li>The orginal problem wants <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span> such that they satisfy all the inequality and minimize the <span class="math inline">\(\frac{1}{2}w^{T}w\)</span></li>
+<li>The reformulated one wants the same thing. Why?
+<ul>
+<li>If we have <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span> violates any inequilities, what gonna happen? the corresponding <span class="math inline">\(\alpha_{i}\)</span> will become <span class="math inline">\(+\infty\)</span> due to the inner maximazation operation. Therefore, the solution from the reformulated question has to satisfy all the inequalities as well.</li>
+<li>Once candidate <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span> satisfies all the constraints, <span class="math inline">\(\alpha_{i}\)</span> will be forced equal to 0 in the inner maximization operation because <span class="math inline">\(\alpha_{i} \geq 0\)</span> and all <span class="math inline">\(1-y_{i}(w^{t}x_{i}+b)&lt;0\)</span></li>
+</ul></li>
+</ul>
+<p>Now we can say after “prove” the equivalence, our SVM is now as</p>
+<center>
+<span class="math inline">\(\underset{w,b}{\text{min}}\Big( \underset{\alpha_{i}\geq0}{\text{max}} \ \frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}(1-y_{i}(w^{T}x_{i}+b))\Big)\)</span>
+</center>
+<ol start="4" style="list-style-type: decimal">
+<li><strong>Two More Steps before We See the Benefits</strong></li>
+</ol>
+<p>The current formulation is hard to be expressed in algebraic mathemtical programming language to obtain a solution. We still have to further simplify it.</p>
+<p>The <strong>first</strong> trick is remove the inner maximation operation and replace it with a random <span class="math inline">\(\alpha^{&#39;}\)</span>(a vector of length N). Then we can get the following inequility:</p>
+<center>
+<span class="math inline">\(\underset{w,b}{\text{min}}\Big( \underset{\alpha_{i}\geq0}{\text{max}} \ \frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}(1-y_{i}(w^{T}x_{i}+b))\Big) \geq \underset{w,b}{\text{min}}\Big(\frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}^{&#39;}(1-y_{i}(w^{T}x_{i}+b))\Big)\)</span>
+</center>
+<p>The logic is that the maxmimized value (left hand side(LHS)) is always greater than or equal to a random value (right hand side(RHS))</p>
+<p>The <strong>second</strong> trick comes this way. For each feasible <span class="math inline">\(\alpha\)</span>, we can have an inequality as above. If we “combine” them together, we can conclude the LHS is greater than or equal to the maximium value of RHS. The logic is LHS is greater than or equal to every RHS therefore it must be greater than or equal to the maximum RHS. If you buy this logic, we’ll reach the following:</p>
+<center>
+<span class="math inline">\(\underset{w,b}{\text{min}}\Big( \underset{\alpha_{i}\geq0}{\text{max}} \ \frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}(1-y_{i}(w^{T}x_{i}+b))\Big) \geq \underset{\alpha_{i}\geq0}{\text{max}}\ \underset{w,b}{\text{min}}\Big(\frac{1}{2}{w^{T}w}+\sum_{i}^{N}\alpha_{i}(1-y_{i}(w^{T}x_{i}+b))\Big)\)</span>
+</center>
+<p>Now, we have a lowerbound (RHS) of the orginal problem (LHS). It swaps the minimization and maximization order. The RHS problem is called the <strong>dual problem</strong> of the LHS.</p>
+<p><strong>What is the benefit ?</strong></p>
+<p>If we take a look at the dual problem, the inner minimization is an unconstrained problem (with respect to <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span> which can be solved much more easily than the original constrained one. In addition, we can obtain some useful properties from this unconstrained version such as the gradient is equal to 0 for the optimal <span class="math inline">\(w\)</span> and <span class="math inline">\(b\)</span></p>
+<p>Secondly as said before, the original problem (the first formula in this post) has d (d+1 if we include b) variables and N constraints. This would be troublesome to solve if d becomes large (think of feature transformation into infinite space). We’ll see in the next post that the dual problem can be further simplifed to reach a version only involvs <span class="math inline">\(\alpha_{i}\)</span> as optimization variables. The number of features (d) in SVM will become irrelavent.(Isn’t this great for infinite feature transformation ?)</p>
